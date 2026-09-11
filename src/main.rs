@@ -14,6 +14,7 @@ mod draw;
 mod keymap;
 mod layout;
 mod legend;
+mod png;
 mod print_mode;
 mod vil;
 
@@ -27,11 +28,19 @@ struct Args {
     /// .vil file to draw
     input: PathBuf,
 
-    /// output SVG (default: alongside the input)
+    /// output file (default: alongside the input)
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// open the SVG when done
+    /// write a PNG instead of an SVG
+    #[arg(long)]
+    png: bool,
+
+    /// PNG scale factor (default: 2, i.e. twice the SVG's nominal size)
+    #[arg(long, default_value_t = 2.0, value_name = "N")]
+    scale: f32,
+
+    /// open the result when done
     #[arg(long)]
     open: bool,
 
@@ -77,7 +86,11 @@ fn run(args: &Args) -> Result<PathBuf, String> {
     let out = args
         .output
         .clone()
-        .unwrap_or_else(|| args.input.with_extension("svg"));
+        .unwrap_or_else(|| args.input.with_extension(if args.png { "png" } else { "svg" }));
+
+    if args.png && !(args.scale.is_finite() && args.scale > 0.0) {
+        return Err(format!("--scale must be a positive number, got {}", args.scale));
+    }
 
     let parsed = vil::parse(&args.input, args.combos_separate)?;
     for s in &parsed.skipped_combos {
@@ -123,6 +136,11 @@ fn run(args: &Args) -> Result<PathBuf, String> {
         svg = print_mode::make_printable(&svg, 24)?;
     }
 
-    std::fs::write(&out, svg).map_err(|e| format!("could not write {}: {e}", out.display()))?;
+    let bytes = if args.png {
+        png::render(&svg, args.scale)?
+    } else {
+        svg.into_bytes()
+    };
+    std::fs::write(&out, bytes).map_err(|e| format!("could not write {}: {e}", out.display()))?;
     Ok(out)
 }

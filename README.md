@@ -7,6 +7,8 @@ vil2svg corne.vil                       # -> corne.svg
 vil2svg corne.vil -o board.svg
 vil2svg corne.vil --open                # also opens it in imv
 vil2svg corne.vil --first-layer --print # just the base layer, filling an A4 page
+vil2svg corne.vil --png                 # -> corne.png, rasterised in-process
+vil2svg corne.vil --png --scale 4       # bigger PNG
 ```
 
 Assumes a Corne / crkbd 3x6+3 matrix (`LAYOUT_split_3x6_3`). The physical layout
@@ -33,7 +35,9 @@ is platform-specific.
 | Flag | Effect |
 | --- | --- |
 | `-o`, `--output` | Output path (default: alongside the input) |
-| `--open` | Open the finished SVG in `imv` |
+| `--png` | Write a PNG instead of an SVG |
+| `--scale` | PNG scale factor (default: 2) |
+| `--open` | Open the result in `imv` (macOS: `open`) |
 | `--all-layers` | Draw entirely empty layers too |
 | `--first-layer` | Draw only the base layer, so it fills the page |
 | `--print` | Black on white, sized to A4 |
@@ -46,6 +50,12 @@ cargo build --release
 cargo test
 ```
 
+PNG output is rasterised in-process with [resvg], so `--png` needs no
+`rsvg-convert`, Inkscape or ImageMagick on the machine. Text is rendered with a
+system monospace font (Menlo on macOS, Liberation Mono on most Linux boxes);
+the glyphs can differ from a browser's, but nothing moves, because vil2svg
+computes its own text wrapping and key positions before the SVG is written.
+
 No runtime dependencies: this is a single static binary. It replaces an earlier
 Python script that shelled out to [keymap-drawer], which needed Python, pipx and
 a venv on the machine doing the drawing. The parts of keymap-drawer this tool
@@ -54,6 +64,7 @@ drawer) are reimplemented in `src/`; its default stylesheet and QMK keycode map
 are vendored verbatim in `src/svg_style.css` and `src/qmk_keycode_map.json`.
 
 [keymap-drawer]: https://github.com/caksoylar/keymap-drawer
+[resvg]: https://github.com/linebender/resvg
 
 ## Differences from the old Python script
 
