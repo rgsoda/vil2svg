@@ -13,6 +13,21 @@ Assumes a Corne / crkbd 3x6+3 matrix (`LAYOUT_split_3x6_3`). The physical layout
 is fetched from QMK once and cached in `~/.cache/vil2svg`, so later runs work
 offline.
 
+## Install
+
+```
+brew install rgsoda/tap/vil2svg
+```
+
+Or from source, anywhere with a Rust toolchain:
+
+```
+cargo install --git https://github.com/rgsoda/vil2svg
+```
+
+macOS and Linux. `--open` uses `imv` on Linux and `open` on macOS; nothing else
+is platform-specific.
+
 ## Flags
 
 | Flag | Effect |
