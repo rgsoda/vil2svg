@@ -1,0 +1,4 @@
+usage: vil2svg.py [-h] [-o OUTPUT] [--yaml] [--open] [--all-layers]
+                  [--first-layer] [--print] [--combos-separate]
+                  input
+vil2svg.py: error: unrecognized arguments: --first-layer --print
